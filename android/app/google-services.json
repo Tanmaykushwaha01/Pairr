@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "800049723897",
+    "project_id": "pairr-socialmedia",
+    "storage_bucket": "pairr-socialmedia.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:800049723897:android:51d13e821dd017070a2528",
+        "android_client_info": {
+          "package_name": "com.example.pairr"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA3-KW5w2paaGUGhqMpfT1UepGYbtXoInQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

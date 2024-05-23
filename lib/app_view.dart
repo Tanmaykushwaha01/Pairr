@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:pairr/components/bottom_navbar.dart';
 import 'package:pairr/screens/auth/view/welcome_screen.dart';
 import 'package:pairr/screens/home/home_screen.dart';
 
@@ -29,12 +30,7 @@ class MyAppView extends StatelessWidget {
         home: BlocBuilder<AuthenticationBloc, AuthenticationState>(
             builder: (context, state) {
           if (state.status == AuthenticationStatus.authenticated) {
-            return BlocProvider(
-              create: (context) => SignInBloc(
-                  userRepository:
-                      context.read<AuthenticationBloc>().userRepository),
-              child: const HomeScreen(),
-            );
+            return const BottomNavBar();
           } else {
             return const WelcomeScreen();
           }

@@ -126,34 +126,78 @@ class _AddPhotoScreenState extends State<AddPhotoScreen> {
                   const SizedBox(
                     height: 20,
                   ),
-                  Container(
-                    width: double.infinity,
-                    height: 120,
-                    decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(20),
-                        image: const DecorationImage(
-                            fit: BoxFit.cover,
-                            image: AssetImage("assets/camera.png"))),
-                    child: const Padding(
-                      padding: EdgeInsets.only(left: 40),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            "Capture from",
-                            style: TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w500),
-                          ),
-                          Text(
-                            "Camera",
-                            style: TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 30),
-                          )
-                        ],
+                  GestureDetector(
+                    onTap: () async {
+                      final ImagePicker picker = ImagePicker();
+                      final XFile? image = await picker.pickImage(
+                          source: ImageSource.camera, imageQuality: 80);
+
+                      if (image != null && mounted) {
+                        print(
+                            'Picked image path: ${image.path}'); // Debug logging
+
+                        CroppedFile? croppedFile =
+                            await ImageCropper().cropImage(
+                          sourcePath: image.path,
+                          aspectRatio:
+                              const CropAspectRatio(ratioX: 9, ratioY: 16),
+                          aspectRatioPresets: [
+                            CropAspectRatioPreset.original,
+                          ],
+                          uiSettings: [
+                            AndroidUiSettings(
+                                toolbarTitle: 'Cropper',
+                                toolbarColor:
+                                    Theme.of(context).colorScheme.primary,
+                                toolbarWidgetColor: Colors.white,
+                                initAspectRatio: CropAspectRatioPreset.original,
+                                lockAspectRatio: false),
+                            IOSUiSettings(
+                              title: 'Cropper',
+                            ),
+                          ],
+                        );
+
+                        if (croppedFile != null && mounted) {
+                          setState(() {
+                            images.add(croppedFile.path);
+                          });
+
+                          Navigator.pop(context, images);
+                        }
+                      } else {
+                        print('No image selected.'); // Debug logging
+                      }
+                    },
+                    child: Container(
+                      width: double.infinity,
+                      height: 120,
+                      decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(20),
+                          image: const DecorationImage(
+                              fit: BoxFit.cover,
+                              image: AssetImage("assets/camera.png"))),
+                      child: const Padding(
+                        padding: EdgeInsets.only(left: 40),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              "Capture from",
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w500),
+                            ),
+                            Text(
+                              "Camera",
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 30),
+                            )
+                          ],
+                        ),
                       ),
                     ),
                   ),

@@ -2,10 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:pairr/components/bottom_navbar.dart';
 import 'package:pairr/screens/auth/view/welcome_screen.dart';
-import 'package:pairr/screens/home/home_screen.dart';
 
 import 'blocs/authentication/authentication_bloc.dart';
-import 'screens/auth/blocs/sign_in_bloc/sign_in_bloc.dart';
 
 class MyAppView extends StatelessWidget {
   const MyAppView({super.key});

@@ -1,20 +1,31 @@
 import 'dart:developer';
+import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:user_repository/src/models/user.dart';
-import 'package:user_repository/src/user_repo.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:path/path.dart';
+import 'package:rxdart/rxdart.dart';
+
+import '../user_repository.dart';
 
 class FirebaseUserRepo implements UserRepository {
   final FirebaseAuth _firebaseAuth;
-  final userCollection = FirebaseFirestore.instance.collection('users');
+  final usersCollection = FirebaseFirestore.instance.collection('users');
 
   FirebaseUserRepo({
     FirebaseAuth? firebaseAuth,
   }) : _firebaseAuth = firebaseAuth ?? FirebaseAuth.instance;
 
   @override
-  Stream<User?> get user {
-    return _firebaseAuth.authStateChanges().map((firebaseUser) => firebaseUser);
+  Stream<MyUser?> get user {
+    return _firebaseAuth.authStateChanges().flatMap((firebaseUser) async* {
+      if (firebaseUser == null) {
+        yield MyUser.empty;
+      } else {
+        yield await usersCollection.doc(firebaseUser.uid).get().then((value) =>
+            MyUser.fromEntity(MyUserEntity.fromDocument(value.data()!)));
+      }
+    });
   }
 
   @override
@@ -45,7 +56,7 @@ class FirebaseUserRepo implements UserRepository {
   @override
   Future<void> setUserData(MyUser myUser) async {
     try {
-      await userCollection
+      await usersCollection
           .doc(myUser.userId)
           .set(myUser.toEntity().toDocument());
     } catch (e) {
@@ -57,5 +68,36 @@ class FirebaseUserRepo implements UserRepository {
   @override
   Future<void> logOut() async {
     await _firebaseAuth.signOut();
+  }
+
+  @override
+  Future<MyUser> userSetup(MyUser myUser) async {
+    try {
+      List<String> tempURL = [];
+
+      for (String picture in myUser.pictures) {
+        if (!picture.startsWith('https')) {
+          File imageFile = File(picture);
+          String imageName = basename(picture);
+          Reference firebaseStorageRef = FirebaseStorage.instance
+              .ref()
+              .child("users/${myUser.userId}/pictures/$imageName");
+          await firebaseStorageRef.putFile(imageFile);
+          String imageURL = await firebaseStorageRef.getDownloadURL();
+          tempURL.add(imageURL);
+        }
+      }
+      myUser.pictures
+          .removeWhere((element) => !(element as String).startsWith('http'));
+      myUser.pictures.addAll(tempURL);
+
+      await usersCollection.doc(myUser.userId).update(
+          {'description': myUser.description, 'pictures': myUser.pictures});
+
+      return myUser;
+    } catch (e) {
+      print(e.toString());
+      rethrow;
+    }
   }
 }

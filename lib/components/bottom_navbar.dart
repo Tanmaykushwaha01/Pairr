@@ -6,6 +6,7 @@ import 'package:pairr/screens/profile/profile_screen.dart';
 import 'package:persistent_bottom_nav_bar/persistent_tab_view.dart';
 
 import '../blocs/authentication/authentication_bloc.dart';
+import '../blocs/setup_data_bloc/setup_data_bloc.dart';
 import '../screens/auth/blocs/sign_in_bloc/sign_in_bloc.dart';
 
 class BottomNavBar extends StatefulWidget {
@@ -19,11 +20,20 @@ class _BottomNavBarState extends State<BottomNavBar> {
   List<Widget> _buildScreens() {
     return [
       const HomeScreen(),
-      BlocProvider(
-        create: (context) => SignInBloc(
-            userRepository: context.read<AuthenticationBloc>().userRepository),
+      MultiBlocProvider(
+        providers: [
+          BlocProvider(
+            create: (context) => SignInBloc(
+                userRepository:
+                    context.read<AuthenticationBloc>().userRepository),
+          ),
+          BlocProvider(
+            create: (context) => SetupDataBloc(
+                context.read<AuthenticationBloc>().userRepository),
+          )
+        ],
         child: const ProfileScreen(),
-      ),
+      )
     ];
   }
 
@@ -52,12 +62,12 @@ class _BottomNavBarState extends State<BottomNavBar> {
 
   @override
   Widget build(BuildContext context) {
-    PersistentTabController _controller;
-    _controller = PersistentTabController(initialIndex: 0);
+    PersistentTabController controller;
+    controller = PersistentTabController(initialIndex: 0);
 
     return PersistentTabView(
       context,
-      controller: _controller,
+      controller: controller,
       screens: _buildScreens(),
 
       items: _navBarsItems(),
